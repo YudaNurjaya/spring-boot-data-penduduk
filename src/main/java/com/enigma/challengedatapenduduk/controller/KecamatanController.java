@@ -24,28 +24,28 @@ public class KecamatanController {
     @Autowired
     ModelMapper modelMapper;
     @PostMapping("/{size}/{page}/{sort}")
-    public ResponseEntity findAll(@PathVariable int size, @PathVariable int page, @PathVariable("sort") String sort)throws Exception{
+    public ResponseEntity findAll(@PathVariable int size, @PathVariable int page, @PathVariable("sort") String sort){
         Pageable pageable = PageRequest.of(page-1, size, Sort.by("id").ascending());
-        if(sort.equals("desc")){
+        if(sort.equalsIgnoreCase("desc")){
             pageable = PageRequest.of(page-1, size, Sort.by("id").descending());
         }
         Iterable<Kecamatan> get = kecamatanService.findAll(pageable);
         return ResponseEntity.status(HttpStatus.OK).body(new SuccessResponse<Iterable<Kecamatan>>("Success",get));
     }
     @PostMapping
-    public ResponseEntity save(@Valid @RequestBody KecamatanRequest request) throws Exception{
+    public ResponseEntity save(@Valid @RequestBody KecamatanRequest request){
         Kecamatan kecamatan = modelMapper.map(request,Kecamatan.class);
         Kecamatan insert = kecamatanService.save(kecamatan);
         return ResponseEntity.status(HttpStatus.CREATED).body(new SuccessResponse<Kecamatan>("Created",insert));
     }
     @PutMapping("/{id}")
-    public ResponseEntity update(@Valid @RequestBody KecamatanRequest kecamatanRequest,@RequestParam Long id) throws Exception{
+    public ResponseEntity update(@Valid @RequestBody KecamatanRequest kecamatanRequest,@RequestParam Long id){
         Kecamatan kecamatan = modelMapper.map(kecamatanRequest,Kecamatan.class);
         Kecamatan insert = kecamatanService.update(kecamatan,id);
         return ResponseEntity.status(HttpStatus.OK).body(new SuccessResponse<Kecamatan>("Updated",insert));
     }
     @DeleteMapping("/{id}")
-    public ResponseEntity delete(@RequestParam Long id) throws Exception{
+    public ResponseEntity delete(@RequestParam Long id){
         kecamatanService.delete(id);
         return ResponseEntity.status(HttpStatus.OK).body(new SuccessResponse<Long>("Deleted",id));
     }

@@ -27,41 +27,45 @@ public class PendudukController {
     PendudukService pendudukService;
     @Autowired
     ModelMapper modelMapper;
-    @PostMapping("/{size}/{page}/{sort}")
-    public ResponseEntity getAll(@PathVariable int size, @PathVariable int page, @PathVariable("sort") String sort)throws Exception{
-        Pageable pageable = PageRequest.of(page,size, Sort.by("nik").ascending());
-        if(sort.equals("desc")){
-            pageable = PageRequest.of(page-1,size, Sort.by("nik").descending());
+    @GetMapping("/{size}/{page}/{sort}")
+    public ResponseEntity getAll(@PathVariable int size, @PathVariable int page, @PathVariable("sort") String sort){
+        Pageable pageable = PageRequest.of(page-1,size, Sort.by("id").ascending());
+        if(sort.equalsIgnoreCase("desc")){
+            pageable = PageRequest.of(page-1,size, Sort.by("id").descending());
         }
         Iterable<Penduduk> get = pendudukService.findAll(pageable);
         return ResponseEntity.status(HttpStatus.OK).body(new SuccessResponse<Iterable<Penduduk>>("Success",get));
     }
     @PostMapping
-    public ResponseEntity save(@Valid @RequestBody PendudukRequest request) throws Exception{
+    public ResponseEntity save(@Valid @RequestBody PendudukRequest request){
         Penduduk penduduk = modelMapper.map(request,Penduduk.class);
         Penduduk input = pendudukService.save(penduduk);
         return ResponseEntity.status(HttpStatus.CREATED).body(new SuccessResponse<Penduduk>("Created",input));
     }
     @PutMapping("/{id}")
-    public ResponseEntity update(@Valid @RequestBody PendudukRequest request, Long id)throws Exception{
+    public ResponseEntity update(@Valid @RequestBody PendudukRequest request, Long id){
         Penduduk penduduk = modelMapper.map(request,Penduduk.class);
         Penduduk insert = pendudukService.update(penduduk,id);
         return ResponseEntity.status(HttpStatus.OK).body(new SuccessResponse<Penduduk>("Updated",insert));
     }
     @DeleteMapping("/{id}")
-    public ResponseEntity delete(Long id)throws Exception{
+    public ResponseEntity delete(Long id){
         pendudukService.delete(id);
         return ResponseEntity.status(HttpStatus.OK).body(new SuccessResponse<Long>("Deleted",id));
     }
     @GetMapping("/search")
-    public ResponseEntity findBy(@RequestParam Map<String, String> searchParam) throws Exception{
-        if(searchParam.containsKey("nik")){
+    public ResponseEntity findBy(@RequestParam Map<String, String> searchParam){
+        if(searchParam.containsKey("id")){
             Optional<Penduduk> find = pendudukService.findById(Long.parseLong(searchParam.get("nik")));
             return ResponseEntity.status(HttpStatus.OK).body(new SuccessResponse<Optional<Penduduk>>("Success",find));
         }
         if(searchParam.containsKey("name")){
             List<Penduduk> find = pendudukService.findByName(searchParam.get("name"));
             return ResponseEntity.status(HttpStatus.OK).body(new SuccessResponse<List<Penduduk>>("Success",find));
+        }
+        if(searchParam.containsKey("nik")){
+            Optional<Penduduk> find = pendudukService.findByNik(searchParam.get("nik"));
+            return ResponseEntity.status(HttpStatus.OK).body(new SuccessResponse<Optional<Penduduk>>("Success",find));
         }
         return null;
     }

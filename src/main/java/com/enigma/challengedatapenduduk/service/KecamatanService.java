@@ -1,5 +1,9 @@
 package com.enigma.challengedatapenduduk.service;
 
+import com.enigma.challengedatapenduduk.exception.DataEmptyException;
+import com.enigma.challengedatapenduduk.exception.DataIntegrationException;
+import com.enigma.challengedatapenduduk.exception.FailedToRunException;
+import com.enigma.challengedatapenduduk.exception.NotFoundException;
 import com.enigma.challengedatapenduduk.model.Kecamatan;
 import com.enigma.challengedatapenduduk.repository.KecamatanRepo;
 import jakarta.transaction.Transactional;
@@ -14,34 +18,40 @@ import java.util.Optional;
 public class KecamatanService {
     @Autowired
     KecamatanRepo kecamatanRepo;
-    public Iterable<Kecamatan> findAll(Pageable pageable) throws Exception{
+    public Iterable<Kecamatan> findAll(Pageable pageable){
         try {
-            return kecamatanRepo.findAll();
-        }catch (Exception e){
-            throw new Exception("Data is empty");
+            return kecamatanRepo.findAll(pageable);
+        }catch (DataEmptyException e){
+            throw new DataEmptyException("Data is empty");
         }
     }
-    public Kecamatan save(Kecamatan kecamatan) throws Exception{
+    public Kecamatan save(Kecamatan kecamatan){
         try {
             return kecamatanRepo.save(kecamatan);
-        }catch (Exception e){
-            throw new Exception("Failed to input");
+        }catch (FailedToRunException e){
+            throw new FailedToRunException();
         }
     }
-    public Kecamatan update(Kecamatan kecamatan, Long id) throws Exception{
+    public Kecamatan update(Kecamatan kecamatan, Long id){
         try {
             Optional<Kecamatan> find = kecamatanRepo.findById(id);
             find.get().setNamaKecamatan(kecamatan.getNamaKecamatan());
             return kecamatanRepo.save(find.get());
-        }catch (Exception e){
-            throw new Exception("Failed to update");
+        }catch (FailedToRunException e){
+            throw new FailedToRunException();
+        }catch (NotFoundException e){
+            throw new NotFoundException("id " + id + " not found");
         }
     }
-    public void delete(Long id) throws Exception{
+    public void delete(Long id) {
         try {
             kecamatanRepo.deleteById(id);
-        }catch (Exception e){
-            throw new Exception("Id not found");
+        }catch (NotFoundException e){
+            throw new NotFoundException("Id " + id +"not found");
+        }catch (FailedToRunException e){
+            throw new FailedToRunException();
+        }catch (DataIntegrationException e){
+            throw new DataIntegrationException();
         }
     }
 }
